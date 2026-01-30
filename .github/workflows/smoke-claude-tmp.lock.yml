@@ -29,7 +29,7 @@ jobs:
 
   activation:
     needs: pre_activation
-    if: always() && false
+    if: always() && true
     runs-on: ubuntu-slim
     steps:
         - run: |
