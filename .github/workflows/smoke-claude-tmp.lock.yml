@@ -29,9 +29,16 @@ jobs:
 
   activation:
     needs: pre_activation
-    if: always()
+    if: always() && false
     runs-on: ubuntu-slim
     steps:
         - run: |
             echo "activation"
+
+  agent:
+    needs: activation
+    runs-on: ubuntu-slim
+    steps:
+        - run: |
+            echo "agent"
 
