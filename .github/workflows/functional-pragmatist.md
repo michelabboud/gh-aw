@@ -34,13 +34,12 @@ tools:
     toolsets: [default]
   edit:
   bash:
-    - "find pkg -name '*.go' -type f"
-    - "grep -r 'var ' --include='*.go' pkg/"
-    - "grep -r 'make(' --include='*.go' pkg/"
-    - "grep -r 'range' --include='*.go' pkg/"
-    - "grep -r 'func New' --include='*.go' pkg/"
-    - "grep -r 'sync\\.' --include='*.go' pkg/"
-    - "grep -r 'global\\|Global' --include='*.go' pkg/"
+    - "*"
+  cache:
+    enabled: true
+    keys:
+      - "last_processed_package"
+      - "processed_packages"
 
 timeout-minutes: 45
 strict: true
@@ -67,19 +66,89 @@ You balance pragmatism with functional purity, focusing on improvements that enh
 - **Language**: Go
 - **Scope**: `pkg/` directory (core library code)
 
+## Round-Robin Package Processing Strategy
+
+**This workflow processes one Go package at a time** in a round-robin fashion to ensure systematic coverage without overwhelming the codebase with changes.
+
+### Package Selection Process
+
+1. **List all packages** in `pkg/` directory:
+   ```bash
+   find pkg -name '*.go' -type f | xargs dirname | sort -u
+   ```
+
+2. **Check cache** for last processed package:
+   ```bash
+   # Read from cache (tools.cache provides this)
+   last_package=$(cache_get "last_processed_package")
+   processed_list=$(cache_get "processed_packages")
+   ```
+
+3. **Select next package** using round-robin:
+   - If `last_processed_package` exists, select the next package in the list
+   - If we've processed all packages, start over from the beginning
+   - Skip packages with no `.go` files or only `_test.go` files
+
+4. **Update cache** after processing:
+   ```bash
+   # Write to cache for next run
+   cache_set "last_processed_package" "$current_package"
+   cache_set "processed_packages" "$updated_list"
+   ```
+
+### Package Processing Rules
+
+- **One package per run** - Focus deeply on a single package to maintain quality
+- **Systematic coverage** - Work through all packages in order before repeating
+- **Skip test-only packages** - Ignore packages containing only test files
+- **Reset after full cycle** - After processing all packages, reset and start over
+
+### Cache Keys
+
+- `last_processed_package` - String: The package path last processed (e.g., `pkg/cli`)
+- `processed_packages` - JSON array: List of packages processed in current cycle
+
+### Example Flow
+
+**Run 1**: Process `pkg/cli` → Cache: `{last: "pkg/cli", processed: ["pkg/cli"]}`
+**Run 2**: Process `pkg/workflow` → Cache: `{last: "pkg/workflow", processed: ["pkg/cli", "pkg/workflow"]}`
+**Run 3**: Process `pkg/parser` → Cache: `{last: "pkg/parser", processed: ["pkg/cli", "pkg/workflow", "pkg/parser"]}`
+...
+**Run N**: All packages processed → Reset cache and start over from `pkg/cli`
+
 ## Your Mission
 
-Perform a systematic analysis of the codebase to identify and implement functional/immutability improvements:
+**IMPORTANT: Process only ONE package per run** based on the round-robin strategy above.
+
+Perform a systematic analysis of the selected package to identify and implement functional/immutability improvements:
 
 ### Phase 1: Discovery - Identify Opportunities
 
-#### 1.1 Find Variables That Could Be Immutable
-
-Search for variables that are initialized and never modified:
+**FIRST: Determine which package to process using the round-robin strategy described above.**
 
 ```bash
-# Find all variable declarations
-find pkg -name '*.go' -type f -exec grep -l 'var ' {} \;
+# Get list of all packages
+all_packages=$(find pkg -name '*.go' -type f | xargs dirname | sort -u)
+
+# Get last processed package from cache
+last_package=$(cache_get "last_processed_package")
+
+# Determine next package to process
+# [Use round-robin logic to select next package]
+next_package="pkg/cli"  # Example - replace with actual selection
+
+echo "Processing package: $next_package"
+```
+
+**For the selected package only**, perform the following analysis:
+
+#### 1.1 Find Variables That Could Be Immutable
+
+Search for variables that are initialized and never modified in the selected package:
+
+```bash
+# Find all variable declarations IN THE SELECTED PACKAGE
+find $next_package -name '*.go' -type f -exec grep -l 'var ' {} \;
 ```
 
 Use Serena to analyze usage patterns:
@@ -865,7 +934,36 @@ For each changed file:
 
 ### Phase 5: Create Pull Request
 
-#### 5.1 Determine If PR Is Needed
+#### 5.1 Update Cache
+
+After processing the package, update the cache:
+
+```bash
+# Update cache with processed package
+current_package="pkg/cli"  # The package you just processed
+processed_list=$(cache_get "processed_packages" || echo "[]")
+
+# Add current package to processed list
+updated_list=$(echo "$processed_list" | jq ". + [\"$current_package\"]"
+
+# Check if we've processed all packages - if so, reset
+all_packages=$(find pkg -name '*.go' -type f | xargs dirname | sort -u | wc -l)
+processed_count=$(echo "$updated_list" | jq 'length')
+
+if [ "$processed_count" -ge "$all_packages" ]; then
+  echo "Completed full cycle - resetting processed packages list"
+  cache_set "processed_packages" "[]"
+else
+  cache_set "processed_packages" "$updated_list"
+fi
+
+# Update last processed package
+cache_set "last_processed_package" "$current_package"
+
+echo "Next run will process the package after: $current_package"
+```
+
+#### 5.2 Determine If PR Is Needed
 
 Only create a PR if:
 - ✅ You made actual functional/immutability improvements
@@ -877,18 +975,21 @@ Only create a PR if:
 If no improvements were made, exit gracefully:
 
 ```
-✅ Codebase analyzed for functional/immutability opportunities.
+✅ Package [$current_package] analyzed for functional/immutability opportunities.
 No improvements found - code already follows good functional patterns.
+Next run will process: [$next_package]
 ```
 
-#### 5.2 Generate PR Description
+#### 5.3 Generate PR Description
 
 If creating a PR, use this structure:
 
 ```markdown
-## Functional/Immutability Enhancements
+## Functional/Immutability Enhancements - Package: `$current_package`
 
-This PR applies moderate, tasteful functional/immutability techniques to improve code clarity, safety, testability, and maintainability.
+This PR applies moderate, tasteful functional/immutability techniques to the **`$current_package`** package to improve code clarity, safety, testability, and maintainability.
+
+**Round-Robin Progress**: This is part of a systematic package-by-package refactoring. Next package to process: `$next_package`
 
 ### Summary of Changes
 
@@ -1037,13 +1138,13 @@ func ProcessOrder(order Order, db DB, log Logger) error  // Orchestration
 
 ---
 
-*Automated by Functional Immutability Enhancer - applying moderate functional/immutability techniques*
+*Automated by Functional Pragmatist - applying moderate functional/immutability techniques to `$current_package`*
 ```
 
-#### 5.3 Use Safe Outputs
+#### 5.4 Use Safe Outputs
 
 Create the pull request using safe-outputs configuration:
-- Title prefixed with `[fp-enhancer]`
+- Title prefixed with `[fp-enhancer]` and includes package name: `[fp-enhancer] Improve $current_package`
 - Labeled with `refactoring`, `functional-programming`, `code-quality`
 - Assigned to `copilot` for review
 - Expires in 7 days if not merged
@@ -1324,6 +1425,8 @@ func (s *Service) GetItems() []Item {
 
 A successful functional programming enhancement:
 
+- ✅ **Processes one package at a time**: Uses round-robin strategy for systematic coverage
+- ✅ **Updates cache correctly**: Records processed package for next run
 - ✅ **Verifies tests exist first**: Uses code search to find tests before refactoring
 - ✅ **Writes tests first**: Adds tests for untested code before refactoring
 - ✅ **Improves immutability**: Reduces mutable state without forcing it
@@ -1356,10 +1459,17 @@ Your output MUST either:
 
 1. **If no improvements found**:
    ```
-   ✅ Codebase analyzed for functional programming opportunities.
+   ✅ Package [$current_package] analyzed for functional programming opportunities.
    No improvements found - code already follows good functional patterns.
+   Cache updated. Next run will process: [$next_package]
    ```
 
 2. **If improvements made**: Create a PR with the changes using safe-outputs
 
-Begin your functional/immutability  analysis now. Systematically identify opportunities for immutability, functional initialization, and transformative operations. Apply tasteful, moderate improvements that enhance clarity and safety while maintaining Go's pragmatic style.
+Begin your functional/immutability analysis now:
+
+1. **Determine which package to process** using the round-robin strategy
+2. **Update your focus** to that single package only  
+3. **Systematically identify opportunities** for immutability, functional initialization, and transformative operations
+4. **Apply tasteful, moderate improvements** that enhance clarity and safety while maintaining Go's pragmatic style
+5. **Update cache** with the processed package before finishing
