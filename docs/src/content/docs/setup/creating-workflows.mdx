@@ -29,7 +29,7 @@ Follow these steps to create an agentic workflow using VSCode or your coding age
 
 3. **Setup required secrets**. If you haven't done so already, [set up your repository secrets](/gh-aw/reference/engines/) for the coding agent your workflow will be using (Copilot, Claude, Codex). Also need to adjust the `engine:` setting in your generated workflow to match if not using Copilot CLI.
 
-Optionally you can also install further agent support for workflow creation by entering this into your coding agent:
+Optionally you can also install the [Custom Agent for Agentic Workflows](/gh-aw/reference/custom-agent/) by entering this into your coding agent:
 
 ```text wrap
 Initialize this repository for GitHub Agentic Workflows using https://github.com/github/gh-aw/blob/main/install.md
@@ -39,7 +39,7 @@ Initialize this repository for GitHub Agentic Workflows using https://github.com
 
 Follow these steps to create agentic workflows on github.com.
 
-1. **Prepare Your Repository**.
+1. **Install the custom agent for agentic workflows**.
 
    Navigate to your repository on https://github.com and click the "Agents" tab, then use this prompt:
 
@@ -47,14 +47,7 @@ Follow these steps to create agentic workflows on github.com.
    Initialize this repository for GitHub Agentic Workflows using https://github.com/github/gh-aw/blob/main/install.md
    ```
 
-   This will guide the Copilot agent to:
-   - Install the `gh-aw` CLI extension
-   - Run `gh aw init` to create necessary configuration files
-   - Commit and push the changes, or create a pull request
-
-   After initialization, you'll have:
-   - `.github/agents/agentic-workflows.agent.md` - [A Copilot file](/gh-aw/reference/glossary/#agent-files) (custom AI instructions) for the `/agent agentic-workflows` command in Copilot Chat
-   - Additional configuration files for workflow authoring
+   This will install the [Custom Agent for Agentic Workflows](/gh-aw/reference/custom-agent/).
 
 2. **Create an agentic workflow**.
 
@@ -63,19 +56,11 @@ Follow these steps to create agentic workflows on github.com.
    ```text wrap
    # Create a new workflow
    /agent agentic-workflows create a workflow that triages issues
-  ```
+   ```
 
    The agent will understand your intent and route to the appropriate specialized prompt for your task.
 
 3. **Setup required secrets**. If you haven't done so already, [set up your repository secrets](/gh-aw/reference/engines/) for the coding agent your workflow will be using (Copilot, Claude, Codex). Also need to adjust the `engine:` setting in your generated workflow to match if not using Copilot CLI.
-
-## Going Further
-
-See [Using the Custom Agent for Agentic Workflows](/gh-aw/reference/custom-agent/) for more information on installing and using the custom agent to create, update, upgrade and debug agentic workflows.
-
-## Other Agents and Chats
-
-The agent file can be loaded into other AI chat interfaces that support custom instructions. The agent is designed to be compatible with various AI tools, although some features might require configuration and you'll need to allow running the compiler.
 
 ## Creating Agentic Workflows with ChatGPT
 
@@ -108,4 +93,8 @@ This prompt helps rephrase text captured through speech-to-text recognition by:
 - Adding necessary context that might be implicit in spoken requests
 
 Load the dictation prompt into your AI assistant before or after dictating your workflow instructions to improve accuracy and clarity.
+
+## Going Further
+
+See [Using the Custom Agent for Agentic Workflows](/gh-aw/reference/custom-agent/) for more information on installing and using the custom agent to create, update, upgrade and debug agentic workflows.
 
