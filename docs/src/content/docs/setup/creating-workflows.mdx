@@ -129,11 +129,13 @@ If you haven't done so already, [set up your repository secrets](/gh-aw/referenc
 
 You can now trigger runs of the workflow either from the Actions tab in GitHub.com or using the `gh aw run` command from your terminal.
 
-## Creating Agentic Workflows by adding an existing workflow
+## Adding an existing Agentic Workflow
 
-You create agentic workflows by adding any existing workflow you have access to.
+You can add any existing workflow you have access to.
 
 1. Find the workflow you want to add on github.com. This could be in another repository.
+
+   Check carefully the workflow comes from a trusted source and is appropriate for your use in your repository. Review the workflow's content and understand what it does before adding it to your repository.
 
 2. Install the [GitHub CLI](https://cli.github.com/) and the GitHub Agentic Workflows extension:
 
@@ -153,7 +155,7 @@ You create agentic workflows by adding any existing workflow you have access to.
    gh aw add https://github.com/githubnext/agentics/blob/main/workflows/daily-repo-status.md
    ```
 
-   This will work for any URL to a workflow markdown file on GitHub. You should check carefully the workflow comes from a trusted source.
+   This will work for any URL to a workflow markdown file on GitHub.
    
    If the workflow is in the top-level `workflows` directory, you can use a shorter form:
 
