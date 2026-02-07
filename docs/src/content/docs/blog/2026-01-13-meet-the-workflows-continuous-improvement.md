@@ -24,10 +24,10 @@ In our [previous posts](/gh-aw/blog/2026-01-13-meet-the-workflows-continuous-sim
 
 ## Continuous Improvement Workflows
 
-- **[Go Fan](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/go-fan.md?plain=1)** - Daily Go module usage reviewer  
-- **[Typist](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/typist.md?plain=1)** - Analyzes type usage patterns for improved safety  
+- **[Go Fan](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/go-fan.md?plain=1)** - Daily Go module usage reviewer  
+- **[Typist](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/typist.md?plain=1)** - Analyzes type usage patterns for improved safety  
 - **[Functional Pragmatist](https://github.com/github/gh-aw/blob/main/.github/workflows/functional-programming-enhancer.md?plain=1)** - Applies functional techniques pragmatically  
-- **[Repository Quality Improver](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/repository-quality-improver.md?plain=1)** - Holistic code quality analysis  
+- **[Repository Quality Improver](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/repository-quality-improver.md?plain=1)** - Holistic code quality analysis  
 
 ### Go Fan: The Dependency Enthusiast 🐹
 
@@ -50,6 +50,8 @@ Let's take a look at an example of how this works:
 3. This created [a parent issue](https://github.com/github/gh-aw/issues/7648) and 5 sub-tasks.
 4. The subtasks were then solved by further workflow runs. An example PR is [Implement parallel multi-file actionlint execution](https://github.com/github/gh-aw/issues/7649).
 
+Through this multi-agent causal chain pattern, Go Fan has generated **58 merged PRs out of 74 proposed (78% merge rate)** across 67 module reviews. Notable chains include: spinner improvements (4 PRs from [briandowns/spinner review](https://github.com/github/gh-aw/discussions/5094)), MCP SDK v1.2.0 upgrade (5 PRs from [go-sdk review](https://github.com/github/gh-aw/discussions/7710)), and terminal styling overhaul (3 PRs from [lipgloss review](https://github.com/github/gh-aw/discussions/5158)).
+
 ### Typist: The Type Safety Advocate
 
 The **Typist** analyzes Go type usage patterns with a singular focus: improving type safety. It hunts for untyped code that should be strongly typed, and identifies duplicated type definitions that create confusion.
@@ -67,6 +69,8 @@ Let's take a look at an example of this in practice:
 - Peli request `/plan` on that issue, causing the Plan agent to do further research and create 5 issues for work to be done such as [Create unified ToolsConfig struct in tools_types.go](https://github.com/github/gh-aw/issues/4155).
 - 4/5 of these issues were then solved by Copilot. For example [Add unified ToolsConfig struct to replace map[string]any pattern](https://github.com/github/gh-aw/pull/4158).
 
+Through this multi-agent causal chain, Typist has produced **19 merged PRs out of 25 proposed (76% merge rate)** from 57 discussions → 22 issues → 25 PRs. The blog example (Discussion #4082 → Issue #4155 → PR #4158) is a verified causal chain.
+
 The static v. dynamic typing debate has raged for decades. Today's hybrid languages like Go, C# and F# support both strong and dynamic typing. Continuous typing improvement offers **a new and refreshing perspective on this old debate**: rather than enforcing strict typing upfront, we can develop quickly with flexibility, then let autonomous agents like Typist trail behind, strengthening type safety over time. This allows us to get the best of both worlds: rapid development without getting bogged down in type design, while still achieving strong typing and safety as the codebase matures.
 
 ### Functional Pragmatist: The Pragmatic Purist 🔄
@@ -80,6 +84,8 @@ It searches for opportunities (mutable variables, imperative loops, initializati
 The workflow is pragmatic: Go's simple style is respected, for-loops stay when clearer, and abstraction is added only where it genuinely improves code. It runs Tuesday and Thursday mornings, systematically improving patterns over time.
 
 An example PR from our own use of this workflow is [Apply functional programming and immutability improvements](https://github.com/github/gh-aw/pull/12921).
+
+Functional Pragmatist (originally named "Functional Enhancer") is a recent addition — so far it has created **2 PRs (both merged, 100% merge rate)**, demonstrating that its pragmatic approach to functional patterns is well-received.
 
 ### Repository Quality Improver: The Holistic Analyst
 
@@ -96,6 +102,8 @@ Example reports from our own use of this workflow are:
 - [Repository Quality Improvement - CI/CD Optimization](https://github.com/github/gh-aw/discussions/6863)
 - [Repository Quality Improvement Report - Performance](https://github.com/github/gh-aw/discussions/13280).
 
+Through its multi-agent causal chain (59 discussions → 30 issues → 40 PRs), Repository Quality Improver has produced **25 merged PRs out of 40 proposed (62% merge rate)**, taking a holistic view of quality from multiple angles.
+
 ## The Power of Continuous Improvement
 
 These workflows complete the autonomous improvement picture: Go Fan keeps dependencies fresh, Typist strengthens type safety, Functional Pragmatist applies functional techniques, and Repository Quality Improver maintains coherence.
@@ -111,13 +119,13 @@ You can add these workflows to your own repository and remix them. Get going wit
 **Go Fan:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/go-fan.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/go-fan.md
 ```
 
 **Typist:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/typist.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/typist.md
 ```
 
 **Functional Pragmatist:**
@@ -129,7 +137,7 @@ gh aw add https://github.com/github/gh-aw/blob/main/.github/workflows/functional
 **Repository Quality Improver:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/repository-quality-improver.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/repository-quality-improver.md
 ```
 
 Then edit and remix the workflow specifications to meet your needs, recompile using `gh aw compile`, and push to your repository. See our [Quick Start](https://github.github.com/gh-aw/setup/quick-start/) for further installation and setup instructions.

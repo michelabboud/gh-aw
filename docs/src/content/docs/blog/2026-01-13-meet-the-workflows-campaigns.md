@@ -28,12 +28,14 @@ But here's the ultimate challenge: how do you coordinate *multiple* agents worki
 
 These agents coordinate multi-agent plans and projects:
 
-- **[Plan Command](https://github.com/github/gh-aw/tree/2c1f68a721ae7b3b67d0c2d93decf1fa5bcf7ee3/.github/workflows/plan.md?plain=1)** - Breaks down issues into actionable sub-tasks via `/plan` command
-- **[Discussion Task Miner](https://github.com/github/gh-aw/tree/2c1f68a721ae7b3b67d0c2d93decf1fa5bcf7ee3/.github/workflows/discussion-task-miner.md?plain=1)** - Extracts actionable tasks from discussion threads
+- **[Plan Command](https://github.com/github/gh-aw/tree/2c1f68a721ae7b3b67d0c2d93decf1fa5bcf7ee3/.github/workflows/plan.md?plain=1)** - Breaks down issues into actionable sub-tasks via `/plan` command — **514 merged PRs out of 761 proposed (67% merge rate)**
+- **[Discussion Task Miner](https://github.com/github/gh-aw/tree/2c1f68a721ae7b3b67d0c2d93decf1fa5bcf7ee3/.github/workflows/discussion-task-miner.md?plain=1)** - Extracts actionable tasks from discussion threads — **60 merged PRs out of 105 proposed (57% merge rate)**
 
-The Plan Command provides on-demand task decomposition: developers can comment `/plan` on any issue to get an AI-generated breakdown into actionable sub-issues that agents can work on.
+Plan Command has contributed **514 merged PRs out of 761 proposed (67% merge rate)**, providing on-demand task decomposition that breaks complex issues into actionable sub-tasks. This is the **highest-volume workflow by attribution** in the entire factory. Developers can comment `/plan` on any issue to get an AI-generated breakdown into actionable sub-issues that agents can work on. A verified example causal chain: [Discussion #7631](https://github.com/github/gh-aw/discussions/7631) → [Issue #8058](https://github.com/github/gh-aw/issues/8058) → [PR #8110](https://github.com/github/gh-aw/pull/8110).
 
-The Workflow Health Manager acts as a project manager, monitoring progress across campaigns and alerting when things fall behind. The Discussion Task Miner takes a different approach - it continuously scans GitHub Discussions (where code quality observations often emerge) and extracts actionable improvement tasks, automatically creating issues so insights don't get lost in conversation threads.
+Discussion Task Miner has contributed **60 merged PRs out of 105 proposed (57% merge rate)**, continuously scanning discussions to extract actionable tasks that might otherwise be lost. The workflow demonstrates perfect causal chain attribution: when it creates an issue from a discussion, and Copilot Coding Assistant later fixes that issue, the resulting PR is correctly attributed to Discussion Task Miner. A verified example: [Discussion #13934](https://github.com/github/gh-aw/discussions/13934) → [Issue #14084](https://github.com/github/gh-aw/issues/14084) → [PR #14129](https://github.com/github/gh-aw/pull/14129). Recent merged examples include [fixing firewall SSL-bump field extraction](https://github.com/github/gh-aw/pull/13920) and [adding security rationale to permissions documentation](https://github.com/github/gh-aw/pull/13918).
+
+The Workflow Health Manager acts as a project manager, monitoring progress across campaigns and alerting when things fall behind.
 
 We learned that individual agents are great at focused tasks, but orchestrating multiple agents toward a shared goal requires careful architecture. Project coordination isn't just about breaking down work - it's about discovering work (Task Miner), planning work (Plan Command), and tracking work (Workflow Health Manager).
 
@@ -46,13 +48,13 @@ You can add these workflows to your own repository and remix them. Get going wit
 **Plan Command:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/plan.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/plan.md
 ```
 
 **Discussion Task Miner:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/discussion-task-miner.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/discussion-task-miner.md
 ```
 
 Then edit and remix the workflow specifications to meet your needs, recompile using `gh aw compile`, and push to your repository. See our [Quick Start](https://github.github.com/gh-aw/setup/quick-start/) for further installation and setup instructions.

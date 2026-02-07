@@ -24,11 +24,10 @@ In our [previous post](/gh-aw/blog/2026-01-13-meet-the-workflows-continuous-simp
 
 ## Continuous Refactoring
 
-Our next three agents continuously analyze code structure, suggesting systematic improvements:
+Our next two agents continuously analyze code structure, suggesting systematic improvements:
 
-- **[Semantic Function Refactor](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/semantic-function-refactor.md?plain=1)** - Spots refactoring opportunities we might have missed  
-- **[Large File Simplifier](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/daily-file-diet.md?plain=1)** - Monitors file sizes and proposes splitting oversized files
-- **[Go Pattern Detector](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/go-pattern-detector.md?plain=1)** - Detects common Go patterns and anti-patterns for consistency  
+- **[Semantic Function Refactor](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/semantic-function-refactor.md?plain=1)** - Spots refactoring opportunities we might have missed  
+- **[Large File Simplifier](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/daily-file-diet.md?plain=1)** - Monitors file sizes and proposes splitting oversized files
 
 The **Semantic Function Refactor** workflow combines agentic AI with code analysis tools to analyze and address the structure of the entire codebase. It analyzes all Go source files in the `pkg/` directory to identify functions that might be in the wrong place.
 
@@ -43,7 +42,7 @@ It then identifies functions that don't fit their current file's theme as outlie
 
 The workflow follows a "one file per feature" principle: files should be named after their primary purpose, and functions within each file should align with that purpose. It closes existing open issues with the `[refactor]` prefix before creating new ones. This prevents issue accumulation and ensures recommendations stay current.
 
-In our own use of Semantic Function Refactoring **36 out of 53 proposed PRs were merged** (67% acceptance rate). It's been impressive to see how many organizational improvements the workflow can identify that we missed, and how practical its suggestions are for improving code structure and maintainability.
+In our extended use of Semantic Function Refactoring, the workflow has driven **112 merged PRs out of 142 proposed (79% merge rate)** through causal chains — creating 99 refactoring issues that downstream agents turn into code changes. For example, [issue #12291](https://github.com/github/gh-aw/issues/12291) analyzing code organization opportunities led to [PR #12363 splitting permissions.go into focused modules](https://github.com/github/gh-aw/pull/12363) (928→133 lines).
 
 An example PR from our own use of this workflow is [Move misplaced extraction functions to frontmatter_extraction.go](https://github.com/github/gh-aw/pull/7043).
 
@@ -55,29 +54,9 @@ The workflow runs on weekdays, analyzing all Go source files in the `pkg/` direc
 
 What makes this workflow effective is its focus and prioritization. Instead of overwhelming developers with issues about every large file, it creates at most one issue, targeting the largest offender. The workflow also skips if an open `[file-diet]` issue already exists, preventing duplicate work.
 
-In our own use, Large File Simplifier has been remarkably successful: **62 out of 78 proposed PRs were merged** (79% acceptance rate). This demonstrates that the refactoring suggestions are practical and valuable - developers agree with the splits and can implement them efficiently.
+In our extended use, Large File Simplifier (also known as "Daily File Diet") has driven **26 merged PRs out of 33 proposed (79% merge rate)** through causal chains — creating 37 file-diet issues targeting the largest files, which downstream agents turn into modular code changes. For example, [issue #12535](https://github.com/github/gh-aw/issues/12535) targeting add_interactive.go led to [PR #12545 refactoring it into 6 domain-focused modules](https://github.com/github/gh-aw/pull/12545).
 
 The workflow uses Serena for semantic code analysis to understand function relationships and propose logical boundaries for splitting. It doesn't just count lines - it analyzes the code structure to suggest meaningful module boundaries that make sense.
-
-### Go Pattern Detector: The Consistency Enforcer
-
-The **Go Pattern Detector** uses another code analysis tool, `ast-grep`, to scan for specific code patterns and anti-patterns. This uses abstract syntax tree (AST) pattern matching to find exact structural patterns.
-
-Currently, the workflow detects use of `json:"-"` tags in Go structs - a pattern that can indicate fields that should be private but aren't, serialization logic that could be cleaner, or potential API design issues.
-
-The workflow runs in two phases. First, AST scanning runs on a standard GitHub Actions runner:
-
-```bash
-# Install ast-grep
-cargo install ast-grep --locked
-
-# Scan for patterns
-sg --pattern 'json:"-"' --lang go .
-```
-
-If patterns are found, it triggers the second phase where the coding agent analyzes the detected patterns, reviews context around each match, determines if patterns are problematic, and creates issues with specific recommendations. This architecture is efficient: fast AST scanning uses minimal resources, expensive AI analysis only runs when needed, false positives don't consume AI budget, and the approach scales to frequent checks without cost concerns.
-
-The workflow is designed to be extended with additional pattern checks - common anti-patterns like ignored errors or global state, project-specific conventions, performance anti-patterns, and security-sensitive patterns.
 
 ## The Power of Continuous Refactoring
 
@@ -90,19 +69,13 @@ You can add these workflows to your own repository and remix them. Get going wit
 **Semantic Function Refactor:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/semantic-function-refactor.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/semantic-function-refactor.md
 ```
 
 **Large File Simplifier:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/daily-file-diet.md
-```
-
-**Go Pattern Detector:**
-
-```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/go-pattern-detector.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/daily-file-diet.md
 ```
 
 Then edit and remix the workflow specifications to meet your needs, recompile using `gh aw compile`, and push to your repository. See our [Quick Start](https://github.github.com/gh-aw/setup/quick-start/) for further installation and setup instructions.

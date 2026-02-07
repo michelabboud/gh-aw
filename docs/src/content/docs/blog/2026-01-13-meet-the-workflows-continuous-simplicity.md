@@ -28,8 +28,8 @@ Now let's meet the agents that work quietly in the background to keep code simpl
 
 The next two agents represent different aspects of  code simplicity: detecting *overcomplicated code* and *duplicated logic*:
 
-- **[Automatic Code Simplifier](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/code-simplifier.md?plain=1)** - Analyzes recently modified code and creates PRs with simplifications  
-- **[Duplicate Code Detector](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/duplicate-code-detector.md?plain=1)** - Uses Serena's semantic analysis to identify duplicate code patterns  
+- **[Automatic Code Simplifier](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/code-simplifier.md?plain=1)** - Analyzes recently modified code and creates PRs with simplifications  
+- **[Duplicate Code Detector](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/duplicate-code-detector.md?plain=1)** - Uses Serena's semantic analysis to identify duplicate code patterns  
 
 The **Automatic Code Simplifier** runs daily, analyzing recently modified code for opportunities to simplify without changing functionality. It looks at what changed in the last few commits and asks: "Could this be clearer? Could it be shorter? Could it be more idiomatic?"
 
@@ -37,7 +37,7 @@ This workflow is particularly valuable after rapid development sessions. When yo
 
 The kinds of simplifications it proposes range from extracting repeated logic into helper functions to converting nested if-statements to early returns. It spots opportunities to simplify boolean expressions, use standard library functions instead of custom implementations, and consolidate similar error handling patterns.
 
-An example PR from our own use of this workflow is [Simplify validation config code for clarity](https://github.com/github/gh-aw/pull/13118).
+Code Simplifier is a recent addition — so far it has created **6 PRs (5 merged, 83% merge rate)**, such as [extracting an action mode helper to reduce code duplication](https://github.com/github/gh-aw/pull/13982) and [simplifying validation config code for clarity](https://github.com/github/gh-aw/pull/13118).
 
 The **Duplicate Code Detector** uses traditional, road-tested semantic code analysis in conjunction with agentic reasoning to find duplicate patterns. It understands code *meaning* rather than just textual similarity, catching patterns where:
 
@@ -50,7 +50,7 @@ What makes this workflow special is its use of semantic analysis through [Serena
 
 The workflow focuses on recent changes in the latest commits, intelligently filtering out test files, workflows, and non-code files. It creates issues only for significant duplication: patterns spanning more than 10 lines or appearing in 3 or more locations. It performs a multi-phase analysis. It starts by setting up Serena's semantic environment for the repository, then finds changed `.go` and `.cjs` files while excluding tests and workflows. Using `get_symbols_overview` and `find_symbol`, it understands structure, identifies similar function signatures and logic blocks, and compares symbol overviews across files for deeper similarities. It creates issues with the `[duplicate-code]` prefix and limits itself to 3 issues per run, preventing overwhelm. Issues include specific file references, code snippets, and refactoring suggestions.
 
-In our use of an early version of Duplicate Code Detector over 2 months, the agent raised **82 of 105 PRs were merged**, demonstrating the practical value of its suggestions.
+In our extended use of Duplicate Code Detector, the agent has raised **76 merged PRs out of 96 proposed (79% merge rate)**, demonstrating sustained practical value of semantic code analysis. Recent examples include [refactoring expired-entity cleanup scripts to share expiration processing](https://github.com/github/gh-aw/pull/13420) and [refactoring safe-output update handlers to eliminate duplicate control flow](https://github.com/github/gh-aw/pull/8791).
 
 ## Continuous AI for Simplicity - A New Paradigm
 
@@ -65,13 +65,13 @@ You can add these workflows to your own repository and remix them. Get going wit
 **Automatic Code Simplifier:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/code-simplifier.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/code-simplifier.md
 ```
 
 **Duplicate Code Detector:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/duplicate-code-detector.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/duplicate-code-detector.md
 ```
 
 Then edit and remix the workflow specifications to meet your needs, recompile using `gh aw compile`, and push to your repository. See our [Quick Start](https://github.github.com/gh-aw/setup/quick-start/) for further installation and setup instructions.

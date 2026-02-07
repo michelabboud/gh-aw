@@ -30,13 +30,17 @@ We learned that the right agent at the right moment with the right information i
 
 These agents respond to commands, providing on-demand assistance whenever you need it:
 
-- **[Q](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/q.md?plain=1)** - Workflow optimizer that investigates performance and creates PRs  
-- **[Grumpy Reviewer](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/grumpy-reviewer.md?plain=1)** - Performs critical code reviews with personality
-- **[Workflow Generator](https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/workflow-generator.md?plain=1)** - Creates new workflows from issue requests
+- **[Q](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/q.md?plain=1)** - Workflow optimizer that investigates performance and creates PRs — **69 merged PRs out of 88 proposed (78% merge rate)**  
+- **[Grumpy Reviewer](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/grumpy-reviewer.md?plain=1)** - Performs critical code reviews with personality — creates issues for downstream agents
+- **[Workflow Generator](https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/workflow-generator.md?plain=1)** - Creates new workflows from issue requests — scaffolds workflow files
 
-Interactive workflows changed how we think about agent invocation. Instead of everything running on a schedule, these respond to slash commands and reactions - `/q` summons the workflow optimizer, a 🚀 reaction triggers analysis. Q (yes, named after the James Bond quartermaster) became our go-to troubleshooter - it investigates workflow performance issues and opens PRs with optimizations.
+Interactive workflows changed how we think about agent invocation. Instead of everything running on a schedule, these respond to slash commands and reactions - `/q` summons the workflow optimizer, a 🚀 reaction triggers analysis. Q (yes, named after the James Bond quartermaster) became our go-to troubleshooter - it has contributed **69 merged PRs out of 88 proposed (78% merge rate)**, responding to commands and investigating workflow issues on demand. Recent examples include [fixing the daily-fact workflow action-tag](https://github.com/github/gh-aw/pull/14127) and [configuring PR triage reports with 1-day expiration](https://github.com/github/gh-aw/pull/13903).
 
-The Grumpy Reviewer gave us surprisingly valuable feedback with a side of sass ("This function is so nested it has its own ZIP code"). We learned that **context is king** - these agents work because they're invoked at the right moment with the right context, not because they run on a schedule.
+The Grumpy Reviewer performs opinionated code reviews, creating issues that flag security risks and code quality concerns (e.g., [#13990](https://github.com/github/gh-aw/issues/13990) about risky event triggers) for downstream agents to fix. It gave us surprisingly valuable feedback with a side of sass ("This function is so nested it has its own ZIP code").
+
+Workflow Generator creates new agentic workflows from issue requests, scaffolding the markdown workflow files that other agents then refine (e.g., [#13379](https://github.com/github/gh-aw/issues/13379) requesting AWF mode changes).
+
+We learned that **context is king** - these agents work because they're invoked at the right moment with the right context, not because they run on a schedule.
 
 ## Using These Workflows
 
@@ -45,19 +49,19 @@ You can add these workflows to your own repository and remix them. Get going wit
 **Q:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/q.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/q.md
 ```
 
 **Grumpy Reviewer:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/grumpy-reviewer.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/grumpy-reviewer.md
 ```
 
 **Workflow Generator:**
 
 ```bash
-gh aw add https://github.com/github/gh-aw/blob/v0.42.4/.github/workflows/workflow-generator.md
+gh aw add https://github.com/github/gh-aw/blob/v0.42.11/.github/workflows/workflow-generator.md
 ```
 
 Then edit and remix the workflow specifications to meet your needs, recompile using `gh aw compile`, and push to your repository. See our [Quick Start](https://github.github.com/gh-aw/setup/quick-start/) for further installation and setup instructions.
