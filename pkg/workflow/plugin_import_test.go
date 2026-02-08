@@ -307,3 +307,42 @@ This workflow imports plugins from a shared workflow.
 	assert.Contains(t, workflowData, "copilot plugin install github/plugin-one",
 		"Expected Copilot engine to install plugin from import")
 }
+
+func TestCompileWorkflowWithPluginImportsClaudeEngineRejectsPlugins(t *testing.T) {
+	// Create a temporary directory for test files
+	tempDir := testutil.TempDir(t, "test-*")
+
+	// Create a shared plugins file
+	sharedPluginsPath := filepath.Join(tempDir, "shared-plugins.md")
+	sharedPluginsContent := `---
+on: push
+plugins:
+  - anthropic/plugin-one
+---
+`
+	require.NoError(t, os.WriteFile(sharedPluginsPath, []byte(sharedPluginsContent), 0644),
+		"Failed to write shared plugins file")
+
+	// Create a workflow file that imports plugins and uses Claude engine
+	workflowPath := filepath.Join(tempDir, "test-workflow.md")
+	workflowContent := `---
+on: issues
+engine: claude
+imports:
+  - shared-plugins.md
+---
+
+# Test Workflow
+
+This workflow uses Claude engine with imported plugins.
+`
+	require.NoError(t, os.WriteFile(workflowPath, []byte(workflowContent), 0644),
+		"Failed to write workflow file")
+
+	// Compile the workflow - should fail because Claude doesn't support plugins
+	compiler := workflow.NewCompiler()
+	err := compiler.CompileWorkflow(workflowPath)
+	require.Error(t, err, "CompileWorkflow should fail because Claude doesn't support plugins")
+	assert.Contains(t, err.Error(), "does not support plugins",
+		"Error should mention that Claude doesn't support plugins")
+}

@@ -505,7 +505,7 @@ func TestValidatePluginSupportErrorMessage(t *testing.T) {
 		t.Errorf("Error message should list the plugins, got: %s", errorMsg)
 	}
 
-	// Error should mention copilot as the supported engine
+	// Error should mention copilot as a supported engine (since it's the only one that supports plugins)
 	if !strings.Contains(errorMsg, "copilot") {
 		t.Errorf("Error message should mention copilot as supported engine, got: %s", errorMsg)
 	}
