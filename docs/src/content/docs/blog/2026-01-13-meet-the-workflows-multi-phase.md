@@ -74,7 +74,7 @@ gh aw add-wizard githubnext/agentics/workflows/pr-fix.md
 
 Then edit and remix the workflow specifications to meet your needs, recompile using `gh aw compile`, and push to your repository. See our [Quick Start](https://github.github.com/gh-aw/setup/quick-start/) for further installation and setup instructions.
 
-You can also [create your own workflows](/gh-aw/setups/creating-workflows).
+You can also [create your own workflows](/gh-aw/setup/creating-workflows).
 
 ## Learn More
 

@@ -255,7 +255,7 @@ DataOps is distinguished by its emphasis on **deterministic data preparation** b
 
 ## Additional Resources
 
-- [Steps Reference](/gh-aw/reference/steps/) - Shell step configuration
+- [Custom Steps](/gh-aw/reference/frontmatter/#custom-steps-steps) - Shell step configuration
 - [Safe Outputs Reference](/gh-aw/reference/safe-outputs/) - Validated GitHub operations
-- [Cache Configuration](/gh-aw/reference/cache/) - Caching data between runs
+- [Cache Configuration](/gh-aw/reference/frontmatter/#cache-configuration-cache) - Caching data between runs
 - [DailyOps](/gh-aw/patterns/dailyops/) - Scheduled improvement workflows
