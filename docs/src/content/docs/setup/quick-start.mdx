@@ -27,7 +27,7 @@ The aim here is to become familiar with **automated AI**: to install something t
 Before installing, ensure you have:
 
 - **AI Account** - a [GitHub Copilot](https://github.com/features/copilot) subscription, or an [Anthropic Claude](https://www.anthropic.com/) or [OpenAI Codex](https://openai.com/api/) API key
-- **GitHub Repository** - A repository where you have **Write** access or higher
+- **GitHub Repository** - A repository where you have write access or higher
 - **GitHub Actions** enabled - Check in [Settings → Actions](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository)
 - **GitHub CLI** (`gh`) v2.0.0+ - [Install here](https://cli.github.com). Check version: `gh --version`
 - **Operating System**: Linux, macOS, or Windows with WSL
@@ -36,13 +36,13 @@ Before installing, ensure you have:
 
 Install the GitHub Agentic Workflows extension:
 
-```bash wrap
+```text wrap
 gh extension install github/gh-aw
 ```
 
 If you are encountering authentication issues, use this script instead:
 
-```bash wrap
+```text wrap
 curl -sL https://raw.githubusercontent.com/github/gh-aw/main/install-gh-aw.sh | bash
 ```
 
@@ -50,7 +50,7 @@ curl -sL https://raw.githubusercontent.com/github/gh-aw/main/install-gh-aw.sh | 
 
 From your repository root run:
 
-```bash wrap
+```text wrap
 gh aw add-wizard githubnext/agentics/daily-repo-status
 ```
 
@@ -83,7 +83,7 @@ import dailyRepoReportResult from '../../../assets/daily-repo-report-result.png'
 
 ### Step 4 - Customize your workflow
 
-With GitHub Agentic Workflows, you are in control! Your repository automation is fully customizable.
+With GitHub Agentic Workflows, you are in control! Your repository automation is fully customizable. You should shape your repo automation to match your priorities and your needs.
 
 In this step, you should adjust the report to assess something you're having trouble with in your repository: your issue blacklog, your CI setup, your testing, the performance of your software, your roadmap, or all of these!
 
