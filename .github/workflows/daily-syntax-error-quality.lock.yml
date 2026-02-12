@@ -26,7 +26,7 @@
 #     - shared/mood.md
 #     - shared/reporting.md
 #
-# frontmatter-hash: 0f96ecf74734688be926914172defbef6b6617ab2f83da4ca4a6eeb82ee054fe
+# frontmatter-hash: 9d8b81f3b657156ff53308afa525c4b0de3e175a51273940421b22b20e118be6
 
 name: "Daily Syntax Error Quality Check"
 "on":
@@ -114,6 +114,19 @@ jobs:
           persist-credentials: false
       - name: Create gh-aw temp directory
         run: bash /opt/gh-aw/actions/create_gh_aw_tmp_dir.sh
+      - name: Set up Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          cache: true
+          go-version-file: go.mod
+      - name: Build gh-aw
+        run: |
+          make build
+      - name: Verify gh-aw installation
+        run: |-
+          ./gh-aw --version
+          echo "gh-aw binary is ready at ./gh-aw"
+
       - name: Configure Git credentials
         env:
           REPO_NAME: ${{ github.repository }}
