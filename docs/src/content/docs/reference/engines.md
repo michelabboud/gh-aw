@@ -1,5 +1,5 @@
 ---
-title: AI Engines
+title: AI Engines (aka Coding Agents)
 description: Complete guide to AI engines (coding agents) usable with GitHub Agentic Workflows, including Copilot and custom engines with their specific configuration options.
 sidebar:
   order: 600
@@ -9,7 +9,7 @@ GitHub Agentic Workflows use [AI Engines](/gh-aw/reference/glossary/#engine) (no
 
 ## Using Copilot CLI
 
-[GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli) is the default AI engine.
+[GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli) is the default AI engine (coding agent).
 
 To use Copilot CLI with GitHub Agentic Workflows:
 
@@ -29,7 +29,7 @@ To use Copilot CLI with GitHub Agentic Workflows:
 
    You **must** have "Public repositories" selected; otherwise, you will not have access to the Copilot Requests permission option.
 
-3. Add it to your repository:
+3. Add the PAT to your GitHub Actions repository secrets as `COPILOT_GITHUB_TOKEN`:
 
    ```bash wrap
    gh aw secrets set COPILOT_GITHUB_TOKEN --value "<your-github-pat>"
