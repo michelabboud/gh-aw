@@ -97,6 +97,10 @@ func (c *Compiler) setupEngineAndImports(result *parser.FrontmatterResult, clean
 	importsResult, err := parser.ProcessImportsFromFrontmatterWithSource(result.Frontmatter, markdownDir, importCache, cleanPath, string(content))
 	if err != nil {
 		orchestratorEngineLog.Printf("Import processing failed: %v", err)
+		// Format ImportCycleError with detailed chain display
+		if cycleErr, ok := err.(*parser.ImportCycleError); ok {
+			return nil, parser.FormatImportCycleError(cycleErr)
+		}
 		return nil, err // Error is already formatted with source location
 	}
 
@@ -126,7 +130,7 @@ func (c *Compiler) setupEngineAndImports(result *parser.FrontmatterResult, clean
 		}
 		if findings := ScanMarkdownSecurity(string(importContent)); len(findings) > 0 {
 			orchestratorEngineLog.Printf("Security scan failed for imported file: %s (%d findings)", importedFile, len(findings))
-			return nil, fmt.Errorf("imported workflow '%s' failed security scan: %s", importedFile, FormatSecurityFindings(findings))
+			return nil, fmt.Errorf("imported workflow '%s' failed security scan: %s", importedFile, FormatSecurityFindings(findings, importedFile))
 		}
 	}
 
