@@ -86,7 +86,11 @@ func TestCJSFilesNoActionsRequires(t *testing.T) {
 	var failedFiles []string
 	var violations []string
 
-	allowedNpmActionsRequires := map[string][]string{}
+	// Exception: handler_auth.cjs is allowed to require @actions/github
+	// because the package is installed at runtime via setup.sh when safe-output-custom-tokens flag is enabled
+	allowedNpmActionsRequires := map[string][]string{
+		"handler_auth.cjs": {"@actions/github"},
+	}
 
 	for _, filename := range cjsFiles {
 		filepath := filepath.Join(cjsDir, filename)

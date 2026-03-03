@@ -9,11 +9,9 @@ permissions:
   issues: read
   pull-requests: read
   discussions: read
-engine: codex
+engine: copilot
 strict: true
 tracker-id: daily-performance-summary
-features:
-  dangerous-permissions-write: true
 tools:
   github:
     toolsets: [default, discussions]

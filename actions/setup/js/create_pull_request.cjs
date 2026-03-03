@@ -16,11 +16,13 @@ const { addExpirationToFooter } = require("./ephemerals.cjs");
 const { generateWorkflowIdMarker } = require("./generate_footer.cjs");
 const { parseBoolTemplatable } = require("./templatable.cjs");
 const { generateFooterWithMessages } = require("./messages_footer.cjs");
+const { generateHistoryUrl } = require("./generate_history_link.cjs");
 const { normalizeBranchName } = require("./normalize_branch_name.cjs");
 const { pushExtraEmptyCommit } = require("./extra_empty_commit.cjs");
 const { createCheckoutManager } = require("./dynamic_checkout.cjs");
 const { getBaseBranch } = require("./get_base_branch.cjs");
 const { createAuthenticatedGitHubClient } = require("./handler_auth.cjs");
+const { buildWorkflowRunUrl } = require("./workflow_metadata_helpers.cjs");
 
 /**
  * @typedef {import('./types/handler-factory').HandlerFactoryFunction} HandlerFactoryFunction
@@ -121,7 +123,7 @@ async function main(config = {}) {
   const maxCount = config.max || 1; // PRs are typically limited to 1
   const maxSizeKb = config.max_patch_size ? parseInt(String(config.max_patch_size), 10) : 1024;
   const { defaultTargetRepo, allowedRepos } = resolveTargetRepoConfig(config);
-  const authClient = await createAuthenticatedGitHubClient(config);
+  const githubClient = await createAuthenticatedGitHubClient(config);
 
   // Base branch from config (if set) - validated at factory level if explicit
   // Dynamic base branch resolution happens per-message after resolving the actual target repo
@@ -531,9 +533,7 @@ async function main(config = {}) {
     // Add AI disclaimer with workflow name and run url
     const workflowName = process.env.GH_AW_WORKFLOW_NAME || "Workflow";
     const workflowId = process.env.GH_AW_WORKFLOW_ID || "";
-    const runId = context.runId;
-    const githubServer = process.env.GITHUB_SERVER_URL || "https://github.com";
-    const runUrl = context.payload.repository ? `${context.payload.repository.html_url}/actions/runs/${runId}` : `${githubServer}/${repoParts.owner}/${repoParts.repo}/actions/runs/${runId}`;
+    const runUrl = buildWorkflowRunUrl(context, context.repo);
     const workflowSource = process.env.GH_AW_WORKFLOW_SOURCE ?? "";
     const workflowSourceURL = process.env.GH_AW_WORKFLOW_SOURCE_URL ?? "";
     const triggeringPRNumber = context.payload.pull_request?.number;
@@ -548,7 +548,14 @@ async function main(config = {}) {
     // Generate footer using messages template system (respects custom messages.footer config)
     // When footer is disabled, only add XML markers (no visible footer content)
     if (includeFooter) {
-      let footer = generateFooterWithMessages(workflowName, runUrl, workflowSource, workflowSourceURL, triggeringIssueNumber, triggeringPRNumber, triggeringDiscussionNumber).trimEnd();
+      const historyUrl = generateHistoryUrl({
+        owner: repoParts.owner,
+        repo: repoParts.repo,
+        itemType: "pull_request",
+        workflowId,
+        serverUrl: context.serverUrl,
+      });
+      let footer = generateFooterWithMessages(workflowName, runUrl, workflowSource, workflowSourceURL, triggeringIssueNumber, triggeringPRNumber, triggeringDiscussionNumber, historyUrl).trimEnd();
       footer = addExpirationToFooter(footer, expiresHours, "Pull Request");
       if (expiresHours > 0) {
         footer += "\n\n<!-- gh-aw-expires-type: pull-request -->";
@@ -720,9 +727,8 @@ async function main(config = {}) {
 
         core.warning("Git push operation failed - creating fallback issue instead of pull request");
 
+        const runUrl = buildWorkflowRunUrl(context, context.repo);
         const runId = context.runId;
-        const githubServer = process.env.GITHUB_SERVER_URL || "https://github.com";
-        const runUrl = context.payload.repository ? `${context.payload.repository.html_url}/actions/runs/${runId}` : `${githubServer}/${repoParts.owner}/${repoParts.repo}/actions/runs/${runId}`;
 
         // Read patch content for preview
         let patchPreview = "";
@@ -764,7 +770,7 @@ gh pr create --title '${title}' --base ${baseBranch} --head ${branchName} --repo
 ${patchPreview}`;
 
         try {
-          const { data: issue } = await authClient.rest.issues.create({
+          const { data: issue } = await githubClient.rest.issues.create({
             owner: repoParts.owner,
             repo: repoParts.repo,
             title: title,
@@ -775,7 +781,10 @@ ${patchPreview}`;
           core.info(`Created fallback issue #${issue.number}: ${issue.html_url}`);
 
           // Update the activation comment with issue link (if a comment was created)
-          await updateActivationComment(authClient, context, core, issue.html_url, issue.number, "issue");
+          //
+          // NOTE: we pass 'github' (global octokit) instead of githubClient (repo-scoped octokit) because the issue is created
+          // in the same repo as the activation, so the global client has the correct context for updating the comment.
+          await updateActivationComment(github, context, core, issue.html_url, issue.number, "issue");
 
           // Write summary to GitHub Actions summary
           await core.summary
@@ -884,7 +893,7 @@ ${patchPreview}`;
 
     // Try to create the pull request, with fallback to issue creation
     try {
-      const { data: pullRequest } = await authClient.rest.pulls.create({
+      const { data: pullRequest } = await githubClient.rest.pulls.create({
         owner: repoParts.owner,
         repo: repoParts.repo,
         title: title,
@@ -898,7 +907,7 @@ ${patchPreview}`;
 
       // Add labels if specified
       if (labels.length > 0) {
-        await authClient.rest.issues.addLabels({
+        await githubClient.rest.issues.addLabels({
           owner: repoParts.owner,
           repo: repoParts.repo,
           issue_number: pullRequest.number,
@@ -910,7 +919,7 @@ ${patchPreview}`;
       // Enable auto-merge if configured
       if (autoMerge) {
         try {
-          await authClient.graphql(
+          await githubClient.graphql(
             `mutation($prId: ID!) {
               enablePullRequestAutoMerge(input: {pullRequestId: $prId}) {
                 pullRequest {
@@ -929,7 +938,10 @@ ${patchPreview}`;
       }
 
       // Update the activation comment with PR link (if a comment was created)
-      await updateActivationComment(authClient, context, core, pullRequest.html_url, pullRequest.number);
+      //
+      // NOTE: we pass 'github' (global octokit) instead of githubClient (repo-scoped octokit) because the issue is created
+      // in the same repo as the activation, so the global client has the correct context for updating the comment.
+      await updateActivationComment(github, context, core, pullRequest.html_url, pullRequest.number);
 
       // Write summary to GitHub Actions summary
       await core.summary
@@ -1026,7 +1038,7 @@ gh pr create --title "${title}" --base ${baseBranch} --head ${branchName} --repo
 ${patchPreview}`;
 
       try {
-        const { data: issue } = await authClient.rest.issues.create({
+        const { data: issue } = await githubClient.rest.issues.create({
           owner: repoParts.owner,
           repo: repoParts.repo,
           title: title,
@@ -1037,7 +1049,9 @@ ${patchPreview}`;
         core.info(`Created fallback issue #${issue.number}: ${issue.html_url}`);
 
         // Update the activation comment with issue link (if a comment was created)
-        await updateActivationComment(authClient, context, core, issue.html_url, issue.number, "issue");
+        // NOTE: we pass 'github' (global octokit) instead of githubClient (repo-scoped octokit) because the issue is created
+        // in the same repo as the activation, so the global client has the correct context for updating the comment.
+        await updateActivationComment(github, context, core, issue.html_url, issue.number, "issue");
 
         // Return success with fallback flag
         return {

@@ -87,7 +87,7 @@ var safeOutputMetaFields = map[string]bool{
 	"staged":          true,
 	"env":             true,
 	"github-token":    true,
-	"app":             true,
+	"github-app":      true,
 	"max-patch-size":  true,
 	"jobs":            true,
 	"runs-on":         true,
@@ -376,9 +376,4 @@ func formatSchemaFailureDetail(pathInfo JSONPathInfo, schemaJSON, frontmatterCon
 		message = message + ". " + suggestions
 	}
 	return fmt.Sprintf("at '%s' (line %d, column %d): %s", path, line, column, message)
-}
-
-// GetMainWorkflowSchema returns the embedded main workflow schema JSON
-func GetMainWorkflowSchema() string {
-	return mainWorkflowSchema
 }

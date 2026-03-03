@@ -1,6 +1,9 @@
 // @ts-check
 /// <reference types="@actions/github-script" />
 
+const { validateTargetRepo, parseAllowedRepos, getDefaultTargetRepo } = require("./repo_helpers.cjs");
+const { ERR_VALIDATION } = require("./error_codes.cjs");
+
 /**
  * Dynamic repository checkout utilities for multi-repo scenarios
  * Enables switching between different repositories during handler execution
@@ -51,6 +54,7 @@ async function getCurrentCheckoutRepo() {
  * @param {string} token - GitHub token for authentication
  * @param {Object} options - Additional options
  * @param {string} [options.baseBranch] - Base branch to checkout (defaults to 'main')
+ * @param {string[]|string} [options.allowedRepos] - Allowed repository patterns for allowlist validation
  * @returns {Promise<Object>} Result with success status
  */
 async function checkoutRepo(repoSlug, token, options = {}) {
@@ -60,8 +64,18 @@ async function checkoutRepo(repoSlug, token, options = {}) {
   if (parts.length !== 2 || !parts[0] || !parts[1]) {
     return {
       success: false,
-      error: `Invalid repository slug: ${repoSlug}. Expected format: owner/repo`,
+      error: `${ERR_VALIDATION}: Invalid repository slug: ${repoSlug}. Expected format: owner/repo`,
     };
+  }
+
+  // Validate target repo against configured allowlist before any git operations
+  const allowedRepos = parseAllowedRepos(options.allowedRepos);
+  if (allowedRepos.size > 0) {
+    const defaultRepo = getDefaultTargetRepo();
+    const validation = validateTargetRepo(repoSlug, defaultRepo, allowedRepos);
+    if (!validation.valid) {
+      return { success: false, error: `${ERR_VALIDATION}: ${validation.error}` };
+    }
   }
 
   const [owner, repo] = parts;
